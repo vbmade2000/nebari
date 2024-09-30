@@ -424,6 +424,53 @@ impl<Root: root::Root, File: ManagedFile> TreeFile<Root, File> {
         Ok(existing_value)
     }
 
+    /// Removes all of the values of keys within `range` if present.
+    ///        
+    /// 
+    /// 
+    /// 
+    /*
+    
+    pub fn get_range<'keys, KeyRangeBounds>(
+        &mut self,
+        range: &'keys KeyRangeBounds,
+        in_transaction: bool,
+    ) -> Result<Vec<(ArcBytes<'static>, Root::Value)>, Error>
+    where
+        KeyRangeBounds: RangeBounds<&'keys [u8]> + Debug + ?Sized,
+     */
+
+
+    pub fn remove_range<'keys, KeyRangeBounds>(
+        &mut self,
+        range: &'keys KeyRangeBounds,
+        persistence_mode: impl Into<PersistenceMode>,
+    ) -> Result<Option<TreeValueIndex<Root>>, Error> 
+    where 
+        KeyRangeBounds: RangeBounds<&'keys [u8]> + Debug + ?Sized, {
+
+        let mut existing_value = None;
+        let keys = range.
+        self.modify(Modification {
+            persistence_mode: persistence_mode.into(),
+            keys: vec![ArcBytes::from(key)],
+            operation: Operation::CompareSwap(CompareSwap::new(
+                &mut |_key, index: Option<&Root::Index>, value| {
+                    existing_value = if let (Some(index), Some(value)) = (index, value) {
+                        Some(ValueIndex {
+                            value,
+                            index: index.clone(),
+                        })
+                    } else {
+                        None
+                    };
+                    KeyOperation::Remove
+                },
+            )),
+        })?;
+        Ok(existing_value)
+    }
+
     /// Sets `key` to `value`. Returns a tuple containing two elements:
     ///
     /// - The previously stored value, if a value was already present.

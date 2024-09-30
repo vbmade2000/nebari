@@ -644,6 +644,19 @@ impl<Root: tree::Root, File: ManagedFile> TransactionTree<Root, File> {
         self.tree.get_range(range, true)
     }
 
+
+    /// Delete all of the values of keys within `range`.
+    // Malhar: Next Step -> Implement remove_range in self.tree.
+    pub fn remove_range<'keys, KeyRangeBounds>(
+        &mut self,
+        range: &'keys KeyRangeBounds,
+    ) -> Result<Vec<(ArcBytes<'static>, Root::Value)>, Error>
+    where
+        KeyRangeBounds: RangeBounds<&'keys [u8]> + Debug + ?Sized,
+    {
+        self.tree.get_range(range, true)
+    }
+
     /// Retrieves all of the indexes of keys within `range`.
     pub fn get_range_indexes<'keys, KeyRangeBounds>(
         &mut self,
